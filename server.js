@@ -10,8 +10,6 @@ const publicRoutes = require('./routes/publicRoutes');
 const Admin = require('./models/Admin');
 const bcrypt = require('bcryptjs');
 
-connectDB();
-
 const app = express();
 
 app.use(cors());
@@ -27,19 +25,22 @@ app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/public', publicRoutes);
 
-// Seed Admin if not exists
+// Seed Admin Logic
 const seedAdmin = async () => {
-  const adminExists = await Admin.findOne({ email: process.env.ADMIN_EMAIL });
-  if (!adminExists) {
-    const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD, 10);
-    await Admin.create({
-      email: process.env.ADMIN_EMAIL,
-      password: hashedPassword
-    });
-    console.log('Admin seeded successfully');
+  try {
+    const adminExists = await Admin.findOne({ email: process.env.ADMIN_EMAIL });
+    if (!adminExists) {
+      const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD, 10);
+      await Admin.create({
+        email: process.env.ADMIN_EMAIL,
+        password: hashedPassword
+      });
+      console.log('Admin seeded successfully');
+    }
+  } catch (error) {
+    console.error('Error seeding admin:', error.message);
   }
 };
-seedAdmin();
 
 // Error Handler
 app.use((err, req, res, next) => {
@@ -48,12 +49,28 @@ app.use((err, req, res, next) => {
   });
 });
 
-const PORT = process.env.PORT || 5000;
+// Database Connection and Server Start
+const startServer = async () => {
+  try {
+    // 1. Connect to Database
+    await connectDB();
 
-if (process.env.NODE_ENV !== 'production') {
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-  });
-}
+    // 2. Seed Admin if not exists
+    await seedAdmin();
+
+    // 3. Start Express Server
+    const PORT = process.env.PORT || 5000;
+    if (process.env.NODE_ENV !== 'production') {
+      app.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+      });
+    }
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  }
+};
+
+startServer();
 
 module.exports = app;
