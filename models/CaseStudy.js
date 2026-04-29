@@ -27,7 +27,7 @@ const CaseStudySchema = new mongoose.Schema({
   category: {
     type: String,
     required: [true, 'Please add a category'],
-    enum: ['WEB', 'MOBILE', 'AI/ML', 'SOFTWARE', 'MARKETING']
+    enum: ['WEB', 'MOBILE', 'AI/ML', 'SOFTWARE', 'MARKETING', 'DIGITAL MARKETING']
   },
   status: {
     type: String,
