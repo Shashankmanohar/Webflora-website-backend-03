@@ -2,6 +2,7 @@ const Inquiry = require('../models/Inquiry');
 const Career = require('../models/Career');
 const Newsletter = require('../models/Newsletter');
 const Blog = require('../models/Blog');
+const CaseStudy = require('../models/CaseStudy');
 
 const submitInquiry = async (req, res) => {
   const { name, email, service, message } = req.body;
@@ -72,4 +73,26 @@ const getBlogBySlug = async (req, res) => {
   }
 };
 
-module.exports = { submitInquiry, submitCareer, subscribeNewsletter, getBlogs, getBlogBySlug };
+const getPublicCaseStudies = async (req, res) => {
+  try {
+    const caseStudies = await CaseStudy.find({ status: 'published' }).sort({ createdAt: -1 });
+    res.json(caseStudies);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const getCaseStudyBySlug = async (req, res) => {
+  try {
+    const caseStudy = await CaseStudy.findOne({ slug: req.params.slug, status: 'published' });
+    if (caseStudy) {
+      res.json(caseStudy);
+    } else {
+      res.status(404).json({ message: 'Case Study not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { submitInquiry, submitCareer, subscribeNewsletter, getBlogs, getBlogBySlug, getPublicCaseStudies, getCaseStudyBySlug };

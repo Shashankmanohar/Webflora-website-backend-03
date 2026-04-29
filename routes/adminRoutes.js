@@ -11,7 +11,11 @@ const {
   deleteAdmin,
   getBlogs,
   createBlog,
-  deleteBlog
+  deleteBlog,
+  getCaseStudies,
+  createCaseStudy,
+  updateCaseStudy,
+  deleteCaseStudy
 } = require('../controllers/adminController');
 const { protect } = require('../middleware/authMiddleware');
 const upload = require('../middleware/uploadMiddleware');
@@ -29,5 +33,10 @@ router.delete('/admins/:id', protect, deleteAdmin);
 router.get('/blogs', protect, getBlogs);
 router.post('/blogs', protect, upload.single('image'), createBlog);
 router.delete('/blogs/:id', protect, deleteBlog);
+
+router.get('/case-studies', protect, getCaseStudies);
+router.post('/case-studies', protect, upload.single('image'), createCaseStudy);
+router.put('/case-studies/:id', protect, upload.single('image'), updateCaseStudy);
+router.delete('/case-studies/:id', protect, deleteCaseStudy);
 
 module.exports = router;

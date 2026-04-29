@@ -3,6 +3,7 @@ const Career = require('../models/Career');
 const Newsletter = require('../models/Newsletter');
 const Admin = require('../models/Admin');
 const Blog = require('../models/Blog');
+const CaseStudy = require('../models/CaseStudy');
 const bcrypt = require('bcryptjs');
 
 const getInquiries = async (req, res) => {
@@ -164,6 +165,96 @@ const deleteAdmin = async (req, res) => {
   }
 };
 
+const getCaseStudies = async (req, res) => {
+  try {
+    const caseStudies = await CaseStudy.find({}).sort({ createdAt: -1 });
+    res.json(caseStudies);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const createCaseStudy = async (req, res) => {
+  try {
+    const { title, slug, description, content, category, status, projectUrl, client, outcome, offset, imageUrl } = req.body;
+    let image = req.file ? req.file.path : imageUrl;
+
+    if (!title || !description || !content || !image || !category) {
+      return res.status(400).json({ message: 'Please provide title, description, content, category and image' });
+    }
+
+    const generatedSlug = slug || title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+    const caseStudy = await CaseStudy.create({
+      title,
+      slug: generatedSlug,
+      description,
+      content,
+      image,
+      category,
+      status: status || 'published',
+      projectUrl,
+      client,
+      outcome,
+      offset: offset === 'true' || offset === true
+    });
+
+    res.status(201).json(caseStudy);
+  } catch (error) {
+    if (error.code === 11000) {
+      return res.status(400).json({ message: 'Slug already exists. Please use a unique slug.' });
+    }
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const updateCaseStudy = async (req, res) => {
+  try {
+    const { title, slug, description, content, category, status, projectUrl, client, outcome, offset, imageUrl } = req.body;
+    const caseStudy = await CaseStudy.findById(req.params.id);
+
+    if (!caseStudy) {
+      return res.status(404).json({ message: 'Case Study not found' });
+    }
+
+    caseStudy.title = title || caseStudy.title;
+    caseStudy.slug = slug || caseStudy.slug;
+    caseStudy.description = description || caseStudy.description;
+    caseStudy.content = content || caseStudy.content;
+    caseStudy.category = category || caseStudy.category;
+    caseStudy.status = status || caseStudy.status;
+    caseStudy.projectUrl = projectUrl || caseStudy.projectUrl;
+    caseStudy.client = client || caseStudy.client;
+    caseStudy.outcome = outcome || caseStudy.outcome;
+    caseStudy.offset = offset !== undefined ? (offset === 'true' || offset === true) : caseStudy.offset;
+
+    if (req.file) {
+      caseStudy.image = req.file.path;
+    } else if (imageUrl) {
+      caseStudy.image = imageUrl;
+    }
+
+    const updatedCaseStudy = await caseStudy.save();
+    res.json(updatedCaseStudy);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const deleteCaseStudy = async (req, res) => {
+  try {
+    const caseStudy = await CaseStudy.findById(req.params.id);
+    if (caseStudy) {
+      await caseStudy.deleteOne();
+      res.json({ message: 'Case Study removed' });
+    } else {
+      res.status(404).json({ message: 'Case Study not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   getInquiries,
   getCareers,
@@ -175,5 +266,9 @@ module.exports = {
   deleteAdmin,
   getBlogs,
   createBlog,
-  deleteBlog
+  deleteBlog,
+  getCaseStudies,
+  createCaseStudy,
+  updateCaseStudy,
+  deleteCaseStudy
 };
