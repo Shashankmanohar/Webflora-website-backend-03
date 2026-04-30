@@ -127,6 +127,48 @@ const updateCareerStatus = async (req, res) => {
   }
 };
 
+const deleteInquiry = async (req, res) => {
+  try {
+    const inquiry = await Inquiry.findById(req.params.id);
+    if (inquiry) {
+      await inquiry.deleteOne();
+      res.json({ message: 'Inquiry removed' });
+    } else {
+      res.status(404).json({ message: 'Inquiry not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const deleteCareer = async (req, res) => {
+  try {
+    const career = await Career.findById(req.params.id);
+    if (career) {
+      await career.deleteOne();
+      res.json({ message: 'Application removed' });
+    } else {
+      res.status(404).json({ message: 'Application not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const deleteNewsletter = async (req, res) => {
+  try {
+    const newsletter = await Newsletter.findById(req.params.id);
+    if (newsletter) {
+      await newsletter.deleteOne();
+      res.json({ message: 'Newsletter subscriber removed' });
+    } else {
+      res.status(404).json({ message: 'Subscriber not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 const getAdmins = async (req, res) => {
   try {
     const admins = await Admin.find({}, '-password');
@@ -260,7 +302,10 @@ module.exports = {
   getCareers,
   updateInquiryStatus,
   updateCareerStatus,
+  deleteInquiry,
+  deleteCareer,
   getNewsletters,
+  deleteNewsletter,
   getAdmins,
   createAdmin,
   deleteAdmin,

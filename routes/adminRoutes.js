@@ -5,7 +5,10 @@ const {
   getCareers,
   updateInquiryStatus,
   updateCareerStatus,
+  deleteInquiry,
+  deleteCareer,
   getNewsletters,
+  deleteNewsletter,
   getAdmins,
   createAdmin,
   deleteAdmin,
@@ -24,7 +27,10 @@ router.get('/inquiries', protect, getInquiries);
 router.get('/careers', protect, getCareers);
 router.get('/newsletters', protect, getNewsletters);
 router.put('/inquiry/:id', protect, updateInquiryStatus);
+router.delete('/inquiry/:id', protect, deleteInquiry);
 router.put('/career/:id', protect, updateCareerStatus);
+router.delete('/career/:id', protect, deleteCareer);
+router.delete('/newsletter/:id', protect, deleteNewsletter);
 
 router.get('/admins', protect, getAdmins);
 router.post('/admins', protect, createAdmin);
