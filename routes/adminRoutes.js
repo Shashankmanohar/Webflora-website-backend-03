@@ -18,7 +18,11 @@ const {
   getCaseStudies,
   createCaseStudy,
   updateCaseStudy,
-  deleteCaseStudy
+  deleteCaseStudy,
+  getJobs,
+  createJob,
+  deleteJob,
+  updateJob
 } = require('../controllers/adminController');
 const { protect } = require('../middleware/authMiddleware');
 const upload = require('../middleware/uploadMiddleware');
@@ -44,5 +48,10 @@ router.get('/case-studies', protect, getCaseStudies);
 router.post('/case-studies', protect, upload.single('image'), createCaseStudy);
 router.put('/case-studies/:id', protect, upload.single('image'), updateCaseStudy);
 router.delete('/case-studies/:id', protect, deleteCaseStudy);
+
+router.get('/jobs', protect, getJobs);
+router.post('/jobs', protect, createJob);
+router.put('/jobs/:id', protect, updateJob);
+router.delete('/jobs/:id', protect, deleteJob);
 
 module.exports = router;

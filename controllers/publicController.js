@@ -3,6 +3,7 @@ const Career = require('../models/Career');
 const Newsletter = require('../models/Newsletter');
 const Blog = require('../models/Blog');
 const CaseStudy = require('../models/CaseStudy');
+const Job = require('../models/Job');
 
 const submitInquiry = async (req, res) => {
   const { name, email, service, message } = req.body;
@@ -95,4 +96,13 @@ const getCaseStudyBySlug = async (req, res) => {
   }
 };
 
-module.exports = { submitInquiry, submitCareer, subscribeNewsletter, getBlogs, getBlogBySlug, getPublicCaseStudies, getCaseStudyBySlug };
+const getJobs = async (req, res) => {
+  try {
+    const jobs = await Job.find({ status: 'open' }).sort({ createdAt: -1 });
+    res.json(jobs);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { submitInquiry, submitCareer, subscribeNewsletter, getBlogs, getBlogBySlug, getPublicCaseStudies, getCaseStudyBySlug, getJobs };

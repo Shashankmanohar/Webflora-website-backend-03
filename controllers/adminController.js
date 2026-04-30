@@ -4,6 +4,7 @@ const Newsletter = require('../models/Newsletter');
 const Admin = require('../models/Admin');
 const Blog = require('../models/Blog');
 const CaseStudy = require('../models/CaseStudy');
+const Job = require('../models/Job');
 const bcrypt = require('bcryptjs');
 
 const getInquiries = async (req, res) => {
@@ -297,6 +298,63 @@ const deleteCaseStudy = async (req, res) => {
   }
 };
 
+const getJobs = async (req, res) => {
+  try {
+    const jobs = await Job.find({}).sort({ createdAt: -1 });
+    res.json(jobs);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const createJob = async (req, res) => {
+  try {
+    const { title, category, type, location, lastDate, status } = req.body;
+    if (!title || !category || !type || !location) {
+      return res.status(400).json({ message: 'Please provide all required fields' });
+    }
+    const job = await Job.create({ title, category, type, location, lastDate, status });
+    res.status(201).json(job);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const deleteJob = async (req, res) => {
+  try {
+    const job = await Job.findById(req.params.id);
+    if (job) {
+      await job.deleteOne();
+      res.json({ message: 'Job removed' });
+    } else {
+      res.status(404).json({ message: 'Job not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const updateJob = async (req, res) => {
+  try {
+    const job = await Job.findById(req.params.id);
+    if (job) {
+      job.title = req.body.title || job.title;
+      job.category = req.body.category || job.category;
+      job.type = req.body.type || job.type;
+      job.location = req.body.location || job.location;
+      job.lastDate = req.body.lastDate || job.lastDate;
+      job.status = req.body.status || job.status;
+
+      const updatedJob = await job.save();
+      res.json(updatedJob);
+    } else {
+      res.status(404).json({ message: 'Job not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   getInquiries,
   getCareers,
@@ -315,5 +373,9 @@ module.exports = {
   getCaseStudies,
   createCaseStudy,
   updateCaseStudy,
-  deleteCaseStudy
+  deleteCaseStudy,
+  getJobs,
+  createJob,
+  deleteJob,
+  updateJob
 };
