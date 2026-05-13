@@ -98,6 +98,51 @@ const deleteBlog = async (req, res) => {
   }
 };
 
+const updateBlog = async (req, res) => {
+  try {
+    const {
+      title, slug, content, author, category, tags, status,
+      seoTitle, seoDescription, seoKeywords, metaExtraHead, datePosted,
+      imageUrl
+    } = req.body;
+    const blog = await Blog.findById(req.params.id);
+
+    if (!blog) {
+      return res.status(404).json({ message: 'Blog not found' });
+    }
+
+    blog.title = title || blog.title;
+    blog.slug = slug || blog.slug;
+    blog.content = content || blog.content;
+    blog.author = author !== undefined ? author : blog.author;
+    blog.category = category || blog.category;
+    blog.status = status || blog.status;
+    blog.seoTitle = seoTitle !== undefined ? seoTitle : blog.seoTitle;
+    blog.seoDescription = seoDescription !== undefined ? seoDescription : blog.seoDescription;
+    blog.seoKeywords = seoKeywords !== undefined ? seoKeywords : blog.seoKeywords;
+    blog.metaExtraHead = metaExtraHead !== undefined ? metaExtraHead : blog.metaExtraHead;
+    blog.datePosted = datePosted || blog.datePosted;
+
+    if (tags !== undefined) {
+      blog.tags = Array.isArray(tags) ? tags : tags.split(',').map(t => t.trim());
+    }
+
+    if (req.file) {
+      blog.image = req.file.path;
+    } else if (imageUrl) {
+      blog.image = imageUrl;
+    }
+
+    const updatedBlog = await blog.save();
+    res.json(updatedBlog);
+  } catch (error) {
+    if (error.code === 11000) {
+      return res.status(400).json({ message: 'Slug already exists. Please use a unique slug.' });
+    }
+    res.status(500).json({ message: error.message });
+  }
+};
+
 const updateInquiryStatus = async (req, res) => {
   try {
     const inquiry = await Inquiry.findById(req.params.id);
@@ -369,6 +414,7 @@ module.exports = {
   deleteAdmin,
   getBlogs,
   createBlog,
+  updateBlog,
   deleteBlog,
   getCaseStudies,
   createCaseStudy,

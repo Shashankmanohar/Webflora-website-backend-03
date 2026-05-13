@@ -14,6 +14,7 @@ const {
   deleteAdmin,
   getBlogs,
   createBlog,
+  updateBlog,
   deleteBlog,
   getCaseStudies,
   createCaseStudy,
@@ -42,6 +43,7 @@ router.delete('/admins/:id', protect, deleteAdmin);
 
 router.get('/blogs', protect, getBlogs);
 router.post('/blogs', protect, upload.single('image'), createBlog);
+router.put('/blogs/:id', protect, upload.single('image'), updateBlog);
 router.delete('/blogs/:id', protect, deleteBlog);
 
 router.get('/case-studies', protect, getCaseStudies);
