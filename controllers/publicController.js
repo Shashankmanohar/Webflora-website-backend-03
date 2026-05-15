@@ -4,6 +4,7 @@ const Newsletter = require('../models/Newsletter');
 const Blog = require('../models/Blog');
 const CaseStudy = require('../models/CaseStudy');
 const Job = require('../models/Job');
+const Comment = require('../models/Comment');
 
 const submitInquiry = async (req, res) => {
   const { name, email, service, message } = req.body;
@@ -105,4 +106,45 @@ const getJobs = async (req, res) => {
   }
 };
 
-module.exports = { submitInquiry, submitCareer, subscribeNewsletter, getBlogs, getBlogBySlug, getPublicCaseStudies, getCaseStudyBySlug, getJobs };
+const getCommentsForBlog = async (req, res) => {
+  try {
+    const comments = await Comment.find({ blogSlug: req.params.slug, status: 'approved' }).sort({ createdAt: -1 });
+    res.json(comments);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const submitComment = async (req, res) => {
+  const { name, email, content } = req.body;
+  const { slug } = req.params;
+
+  if (!name || !email || !content) {
+    return res.status(400).json({ message: 'Name, Email, and Content are required.' });
+  }
+
+  try {
+    const comment = await Comment.create({
+      blogSlug: slug,
+      name,
+      email,
+      content
+    });
+    res.status(201).json({ message: 'Comment posted successfully', data: comment });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+module.exports = { 
+  submitInquiry, 
+  submitCareer, 
+  subscribeNewsletter, 
+  getBlogs, 
+  getBlogBySlug, 
+  getPublicCaseStudies, 
+  getCaseStudyBySlug, 
+  getJobs,
+  getCommentsForBlog,
+  submitComment
+};
