@@ -2,7 +2,6 @@ const express = require('express');
 const dotenv = require('dotenv');
 dotenv.config();
 
-const cors = require('cors');
 const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const adminRoutes = require('./routes/adminRoutes');
@@ -12,7 +11,14 @@ const bcrypt = require('bcryptjs');
 
 const app = express();
 
-app.use(cors());
+// Handle OPTIONS preflight requests globally
+app.use((req, res, next) => {
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  next();
+});
+
 app.use(express.json());
 
 // Test Route
