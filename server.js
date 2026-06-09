@@ -1,5 +1,6 @@
 const express = require('express');
 const dotenv = require('dotenv');
+const cors = require('cors');
 dotenv.config();
 
 const connectDB = require('./config/db');
@@ -11,13 +12,12 @@ const bcrypt = require('bcryptjs');
 
 const app = express();
 
-// Handle OPTIONS preflight requests globally
-app.use((req, res, next) => {
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-  next();
-});
+// Enable CORS for all routes
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token', 'X-Requested-With', 'Accept', 'Accept-Version', 'Content-Length', 'Content-MD5', 'Date', 'X-Api-Version']
+}));
 
 app.use(express.json());
 
