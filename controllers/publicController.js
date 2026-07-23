@@ -7,10 +7,16 @@ const Job = require('../models/Job');
 const Comment = require('../models/Comment');
 
 const submitInquiry = async (req, res) => {
-  const { name, email, service, message } = req.body;
+  const { name, email, phone, service, message } = req.body;
 
   try {
-    const inquiry = await Inquiry.create({ name, email, service, message });
+    const inquiry = await Inquiry.create({ 
+      name, 
+      email: email || '', 
+      phone: phone || '', 
+      service: service || 'Attendance Software Inquiry', 
+      message: message || 'Quick Quote Request' 
+    });
     res.status(201).json({ message: 'Inquiry submitted successfully', data: inquiry });
   } catch (error) {
     res.status(400).json({ message: error.message });
