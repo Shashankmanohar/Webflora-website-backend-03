@@ -5,9 +5,43 @@ const Blog = require('../models/Blog');
 const CaseStudy = require('../models/CaseStudy');
 const Job = require('../models/Job');
 const Comment = require('../models/Comment');
+const {
+  isHoneypotFilled,
+  isDisposableEmail,
+  isValidName,
+  isValidEmail,
+  isValidMessageQuality
+} = require('../utils/spamFilter');
 
 const submitInquiry = async (req, res) => {
   const { name, email, phone, service, message } = req.body;
+
+  // 1. Honeypot Field Check (Silent Bot Discard)
+  if (isHoneypotFilled(req.body)) {
+    return res.status(200).json({ message: 'Inquiry submitted successfully' });
+  }
+
+  // 2. Name Format & Gibberish Validation
+  if (!name || !isValidName(name)) {
+    return res.status(400).json({ message: 'Please provide a valid name (letters and spaces only).' });
+  }
+
+  // 3. Email & Disposable Domain Validation
+  if (email && !isValidEmail(email)) {
+    return res.status(400).json({ message: 'Please provide a valid, non-disposable email address.' });
+  }
+
+  // 4. Message Quality & Minimum Length Validation
+  const effectiveMessage = message || 'Quick Quote Request';
+  if (effectiveMessage !== 'Quick Quote Request' && !isValidMessageQuality(effectiveMessage)) {
+    return res.status(400).json({ 
+      message: 'Message does not meet quality standards. Please provide a clear description (at least 15 characters).' 
+    });
+  }
+
+  // Extract Client IP and User Agent
+  const ipAddress = (req.headers['x-forwarded-for'] || req.ip || req.socket.remoteAddress || '').split(',')[0].trim();
+  const userAgent = req.headers['user-agent'] || '';
 
   try {
     const inquiry = await Inquiry.create({ 
@@ -15,7 +49,9 @@ const submitInquiry = async (req, res) => {
       email: email || '', 
       phone: phone || '', 
       service: service || 'Attendance Software Inquiry', 
-      message: message || 'Quick Quote Request' 
+      message: effectiveMessage,
+      ipAddress,
+      userAgent
     });
     res.status(201).json({ message: 'Inquiry submitted successfully', data: inquiry });
   } catch (error) {
@@ -125,8 +161,20 @@ const submitComment = async (req, res) => {
   const { name, email, content } = req.body;
   const { slug } = req.params;
 
-  if (!name || !email || !content) {
-    return res.status(400).json({ message: 'Name, Email, and Content are required.' });
+  if (isHoneypotFilled(req.body)) {
+    return res.status(201).json({ message: 'Comment posted successfully' });
+  }
+
+  if (!name || !isValidName(name)) {
+    return res.status(400).json({ message: 'Valid name is required.' });
+  }
+
+  if (!email || !isValidEmail(email)) {
+    return res.status(400).json({ message: 'Valid non-disposable email is required.' });
+  }
+
+  if (!content || !isValidMessageQuality(content)) {
+    return res.status(400).json({ message: 'Comment content does not meet quality requirements.' });
   }
 
   try {
